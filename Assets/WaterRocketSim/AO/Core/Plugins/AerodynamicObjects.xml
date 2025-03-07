@@ -1,0 +1,928 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AerodynamicObjects</name>
+    </assembly>
+    <members>
+        <member name="T:AerodynamicObjects.AerodynamicGroup">
+            <summary>
+            Used to combine Aerodynamic Objects by adjusting their individual planform areas
+            so that their total planform area matches the AerodynamicGroup planform area. This enables the
+            construction of composite objects which have their own defined planform areas, such as wings.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicGroup.planformArea">
+            <summary>
+            The planform area of the group. This is used to scale the areas of all associated aerodynamic objects. (m^2)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicGroup.Span">
+            <summary>
+            The total span of the group. Any aerodynamic object in the group will use the group span to determine its own aspect ratio. (m)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicGroup.objectPlanformAreas">
+            <summary>
+            Store the planform areas of each object in the group.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicGroup.objectAreaScale">
+            <summary>
+            Value used to scale each aerodynamic object's planform area so that their total planform area matches the group planform area. (dimensionless)
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicGroup.AddObjectToGroup(AerodynamicObjects.AerodynamicObject)">
+            <summary>
+            Add a single aerodynamic object to the group.
+            </summary>
+            <param name="ao">The object to be added</param>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicGroup.AddObjectsToGroup(AerodynamicObjects.AerodynamicObject[])">
+            <summary>
+            Add multiple aerodynamic objects to the group. This will preserve the existing objects.
+            </summary>
+            <param name="aos">Array of aerodynamic objects to add to the group</param>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicGroup.SetObjectsAsGroup(AerodynamicObjects.AerodynamicObject[])">
+            <summary>
+            Set the aerodynamic objects of the group. This will overwrite the previous array.
+            </summary>
+            <param name="aos">The array of objects to set for the group</param>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicGroup.SetObjectAsGroup(AerodynamicObjects.AerodynamicObject)">
+            <summary>
+            Set the aerodynamic objects of the group. This will overwrite the previous array.
+            </summary>
+            <param name="ao">The object to set for the group</param>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicGroup.RemoveAt(System.Int32)">
+            <summary>
+            Remove the aerodynamic object from the group array at the given index.
+            </summary>
+            <param name="index">The index of the object to be removed</param>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicGroup.ClearGroup">
+            <summary>
+            Remove all objects from the group. Creates a new array of length zero. Does not ungroup the objects in the group.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicGroup.UpdateMemberInfo(System.Int32,System.Double)">
+            <summary>
+            Updates the area of the object in the group. This is necessary because the group cannot store
+            references to aerodynamic objects for serialisation reasons.
+            </summary>
+            <param name="index">Group index of the object.</param>
+            <param name="area">Body Planform Area of the object. (m^2)</param>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicGroup.UpdateAreaScaling">
+            <summary>
+            Finds the ratio of the group's planform area to the total area of the aerodynamic objects in the group.
+            This ratio is then used to scale the planform areas of each object in the group
+            so that their total planform area matches the intended group planform area.
+            </summary>
+        </member>
+        <member name="T:AerodynamicObjects.AerodynamicLoad">
+            <summary>
+            Stores the aerodynamic load acting on an object, including the force vector and the moment.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicLoad.force">
+            <summary>
+            The direction and magnitude of the force. (N)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicLoad.moment">
+            <summary>
+            The moment, or torque, which accompanies the force. (Nm)
+            </summary>
+        </member>
+        <member name="T:AerodynamicObjects.AerodynamicObject">
+            <summary>
+            An Aerodynamic Object determines the aerodynamic forces and moments acting on itself
+            <br>due to the object's dimensions and state, as well as the state and properties of the fluid around the object.</br>
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.LocalRotation">
+            <summary>
+            The rotation of the aerodynamic object's local frame of reference relative to the global (earth) frame of reference.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.LocalInverseRotation">
+            <summary>
+            The inverse rotation of the aerodynamic object's local frame of reference relative to the global (earth) frame of reference.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.BodyRotation">
+            <summary>
+            The rotation of the aerodynamic body frame of reference relative to the local (object) frame of reference.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.BodyInverseRotation">
+            <summary>
+            The inverse rotation of the aerodynamic body frame of reference. This is measured relative to the local (object) frame of reference.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.TransformBodyToLocal(AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Rotates a vector by the quaternion rotation from the body frame of reference to the local frame of reference.
+            </summary>
+            <param name="vector">The vector given in the body frame of reference</param>
+            <returns>The vector in the local frame of reference</returns>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.TransformLocalToBody(AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Rotates a vector by the quaternion 
+            rotation from the local frame of reference to the body frame of reference.
+            </summary>
+            <param name="vector">The vector given in the local frame of reference</param>
+            <returns>The vector in the body frame of reference</returns>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.TransformGlobalToLocal(AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Rotates a vector from the global (earth) frame of reference to the local frame of reference.
+            </summary>
+            <param name="vector">The vector given in the global (earth) frame of reference</param>
+            <returns>The vector in the local frame of reference</returns>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.TransformLocalToGlobal(AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Rotates a vector from the local frame of reference to the global (earth) frame of reference.
+            </summary>
+            <param name="vector">The vector given in the local frame of reference</param>
+            <returns>The vector in the global (earth) frame of reference</returns>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.Gravity">
+            <summary>
+            The acceleration due to gravity in the global (earth) frame of reference. Default value is (0, -9.81, 0). (m/s^2)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.hasGroup">
+            <summary>
+            Is this object part of a group? If so, its planform area and aspect ratio will depend on the group.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.groupIndex">
+            <summary>
+            The index of the object in the group array.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.SetGroup(System.Int32,AerodynamicObjects.AerodynamicGroup)">
+            <summary>
+            Assign the group that this object belongs to, if any.
+            Groups are used for the construction of composite aerodynamic objects
+            which have their own defined planform areas and aspect ratios, such as wings.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.MyGroup">
+            <summary>
+            The aerodynamic group that this object belongs to.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.UnGroup">
+            <summary>
+            Removes the object from its current group. The object will use its own planform area and aspect ratio.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.AerodynamicModels">
+            <summary>
+            The collection of aerodynamic models which will be applied to this object.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.AerodynamicLoads">
+            <summary>
+            The aerodynamic loads acting on the object.
+            Given by the aerodynamic models attached to the object.
+            <br>In the local frame of reference.</br>
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.NetAerodynamicLoad">
+            <summary>
+            The sum of all the aerodynamic loads acting on the object.
+            Given by the aerodynamic models attached to the object.
+            <br>In the local frame of reference.</br>
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.Fluid">
+            <summary>
+            The state and properties of the fluid around the object.
+            </summary>
+        </member>
+        <member name="T:AerodynamicObjects.AerodynamicObject.ReferenceFrame">
+            <summary>
+            The set of reference frames used in the aerodynamic models.
+            Global (earth) frame is the inertial frame of reference.
+            Local frame is the object's frame of reference.
+            Body frame is a rotation from the object's frame to align (x, y, z) with (span, thickness, chord).
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.ReferenceFrame.Global">
+            <summary>
+            Global (earth) frame is the inertial frame of reference.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.ReferenceFrame.Local">
+            <summary>
+            Local frame is the object's frame of reference.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.ReferenceFrame.Body">
+            <summary>
+            Body frame is a rotation from the object's frame to align (x, y, z) with (span, thickness, chord).
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.GlobalVelocity">
+            <summary>
+            Velocity of the object in the global (earth) frame of reference. (m/s)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.LocalVelocity">
+            <summary>
+            Velocity of the object in the object's local frame of reference. (m/s)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.BodyVelocity">
+            <summary>
+            Velocity of the object in the body frame of reference. (m/s)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.GlobalRelativeVelocity">
+            <summary>
+            Velocity of the object relative to the fluid. Measured in the global (earth) frame of reference. (m/s)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.LocalRelativeVelocity">
+            <summary>
+            Velocity of the object relative to the fluid. Measured in the object's local frame of reference. (m/s)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.BodyRelativeVelocity">
+            <summary>
+            Velocity of the object relative to the fluid. Measured in the body frame of reference. (m/s)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.GlobalAngularVelocity">
+            <summary>
+            Angular velocity of the object in the global (earth) frame of reference. (m/s)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.LocalAngularVelocity">
+            <summary>
+            Angular velocity of the object in the object's local frame of reference. (m/s)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.BodyAngularVelocity">
+            <summary>
+            Angular velocity of the object in the body frame of reference. (m/s)
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.GetDynamicPressure">
+            <summary>
+            The dynamic pressure due to motion of the object through the fluid.
+            Given by 0.5 * rho * V^2 (Pa)
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.SetVelocity(AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Takes the velocity of the object in the global (earth) frame of reference. Transforms it into the body and local frames and stores them.
+            Assumes that the angular velocity of the object is zero.
+            </summary>
+            <param name="velocity">The velocity in the global (earth) frame of reference. (m/s)</param>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.SetVelocity(AerodynamicObjects.Numerics.Vector3,AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Takes the velocity and rotational velocity of the object in the global (earth) frame of reference. Transforms them into the body and local frames and stores them.
+            To save on calculations, do not pass the angular velocity if it is known to be zero.
+            </summary>
+            <param name="velocity">The velocity in the global (earth) frame of reference. (m/s)</param>
+            <param name="angularVelocity">The angular velocity in the global (earth) frame of reference. (rad/s)</param>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.SetVelocity(AerodynamicObjects.Numerics.Vector3,AerodynamicObjects.AerodynamicObject.ReferenceFrame)">
+            <summary>
+            Takes the velocity of the object in the specified frame of reference. Assumes the angular velocity is zero.
+            Transforms the given velocities into the remaining frames and stores them.
+            To save on calculations, do not pass the angular velocity if it is known to be zero.
+            </summary>
+            <param name="velocity">The velocity in the specified frame of reference. (m/s)</param>
+            <param name="referenceFrame">The frame of reference that the velocities are measured in.</param>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.SetVelocity(AerodynamicObjects.Numerics.Vector3,AerodynamicObjects.Numerics.Vector3,AerodynamicObjects.AerodynamicObject.ReferenceFrame)">
+            <summary>
+            Takes the velocity and rotational velocity of the object in the specified frame of reference.
+            Transforms the given velocities into the remaining frames and stores them.
+            To save on calculations, do not pass the angular velocity if it is known to be zero.
+            </summary>
+            <param name="velocity">The velocity in the specified frame of reference. (m/s)</param>
+            <param name="angularVelocity">The angular velocity in the specified frame of reference. (rad/s)</param>
+            <param name="referenceFrame">The frame of reference that the velocities are measured in.</param>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.SetLocalRotation(AerodynamicObjects.Numerics.Quaternion)">
+            <summary>
+            Sets the rotation of the local frame of reference relative to the global (earth) frame of reference.
+            </summary>
+            <param name="rotation">Quaternion rotation of the local frame of reference.</param>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.SetBodyRotation(AerodynamicObjects.Numerics.Quaternion)">
+            <summary>
+            Sets the rotation of the body frame of reference relative to the local frame of reference.
+            </summary>
+            <param name="rotation">Quaternion rotation of the body frame of reference.</param>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.SetFluidVelocity(AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Sets the velocity of the fluid around the object using a velocity in the global (earth) frame of reference.
+            </summary>
+            <param name="velocity">Velocity of the fluid in the global (earth) frame of reference. (m/s)</param>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.AddToFluidVelocity(AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Add to the velocity of the fluid around the object. Velocity is measured in the global (earth) frame of reference.
+            </summary>
+            <param name="velocity">Velocity increment for the fluid in the global (earth) frame of reference. (m/s)</param>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.FluidPressure">
+            <summary>
+            The pressure of the fluid local to the object. (Pa)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.FluidDensity">
+            <summary>
+            The density of the fluid local to the object. (kg/m^3)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.FluidDynamicViscosity">
+            <summary>
+            The dynamic viscosity of the fluid local to the object. (Pa s)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.Span">
+            <summary>
+            The longest diameter of the object (m) (Read Only)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.Thickness">
+            <summary>
+            The shortest diameter of the object (m) (Read Only)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.Chord">
+            <summary>
+            The median diameter of the object (m) (Read Only)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.MinorAxis">
+            <summary>
+            The shortest radius of the object to thickness / 2. (m)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.MidAxis">
+            <summary>
+            The median radius of the object to chord / 2. (m)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.MajorAxis">
+            <summary>
+            The longest radius of the object to span / 2. (m)
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.SetSpanThicknessChord(System.Double,System.Double,System.Double)">
+            <summary>
+            Stores the dimensions of the body.
+            Uses the span, thickness, and chord to calculate and store major, minor, and mid axes.
+            </summary>
+            <param name="span">The longest diameter of the body (m)</param>
+            <param name="thickness">The shortest diameter of the body (m)</param>
+            <param name="chord">The median diameter of the body (m)</param>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.PlanformArea">
+            <summary>
+            The planform area used in aerodynamic calculations.
+            This property returns the scaled BodyPlanformArea.
+            If the object is in a group then the area scaling may be a value other than 1.
+            If the object is not in a group, then the value of BodyPlanformArea will be returned. (m^2) (Read Only)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.BodySideArea">
+            <summary>
+            The area of the body as viewed from the sides.
+            Given by: 0.25 * pi * chord * thickness. This area is unaffected by grouping. (m^2) (Read Only)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.BodyPlanformArea">
+            <summary>
+            The area of the body as viewed from the top or bottom.
+            Given by: 0.25 * pi * span * chord. This area is unaffected by grouping. (m^2) (Read Only)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.BodyFrontalArea">
+            <summary>
+            The area of the body as viewed from the front or back.
+            Given by: 0.25 * pi * span * thickness. This area is unaffected by grouping. (m^2) (Read Only)
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.GetEllipsoidSurfaceArea">
+            <summary>
+            The approximate surface area of the ellipsoid  (m^2)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.MinorAxisVolume">
+            <summary>
+            The volume of the minor axis based on the product of the axis radius and
+            the square of the largest of the two radii perpendicular to the axis.
+            In this case: 4/3 * pi * minor axis * major axis^2. (m^3) (Read Only)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.MidAxisVolume">
+            <summary>
+            The volume of the mid axis. Based on the product of the axis radius and
+            the square of the largest of the two radii perpendicular to the axis.
+            In this case: 4/3 * pi * mid axis * major axis^2. (m^3) (Read Only)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.MajorAxisVolume">
+            <summary>
+            The volume of the major axis. Based on the product of the axis radius and
+            the square of the largest of the two radii perpendicular to the axis.
+            In this case: 4/3 * pi * major axis * mid axis^2. (m^3) (Read Only)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.BodyCamber">
+            <summary>
+            Body camber is the camber due to the shape of the object.
+            This does not include the camber due to control surface deflection. (m)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.TotalCamber">
+            <summary>
+            Total camber is the combination of body camber and camber due to control surface deflection. (m) (Read Only)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.AerodynamicObject.ControlCamber">
+            <summary>
+            Control camber is the camber due to the deflection of the control surface attached to the  (m)
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.SetDimensions(System.Double,System.Double,System.Double)">
+            <summary>
+            Takes the dimensions of the object in the local frame of reference and finds the rotation needed
+            to provide a Body frame which has the (span, thickness, chord) aligned with (x, y, z).
+            Sets the Body dimensions and rotation.
+            </summary>
+            <param name="x">The dimension of the aerodynamic object in the local x axis (m)</param>
+            <param name="y">The dimension of the aerodynamic object in the local y axis (m)</param>
+            <param name="z">The dimension of the aerodynamic object in the local z axis (m)</param>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.AngleOfAttackRotationVector">
+            <summary>
+            The vector about which the angle of attack rotation is defined. (Read Only)
+            <br>In the body frame of reference.</br>
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.AngleOfAttack">
+            <summary>
+            The angle in the plane which is perpendicular to the body's planform area which tends
+            from the body's chord to the wind velocity vector. (rad) (Read Only)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.AerodynamicObject.AngleOfSideslip">
+            <summary>
+            The angle in the plane which is parallel to the body's planform area which tends
+            from the body's chord to the wind velocity vector. (rad) (Read Only)
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.GetAnglesOfAttackAndSideslip">
+            <summary>
+            Calculate the angles of attack and sideslip for the object, based on its velocity.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.ComputeAerodynamicForces">
+            <summary>
+            Iterate through all of the attached aerodynamic models and store the forces
+            they provide for the body in the aerodynamicForces array.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.AerodynamicObject.RunAerodynamics">
+            <summary>
+            Perform all of the necessary calculations to get from the object's state
+            to the aerodynamic forces acting on the object.
+            </summary>
+        </member>
+        <member name="T:AerodynamicObjects.BuoyancyModel">
+            <summary>
+            Calculates a simple buoyancy force based on the volume of the ellipsoid body and the density of the fluid
+            around the object.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.BuoyancyModel.GetAerodynamicLoad(AerodynamicObjects.AerodynamicObject)">
+            <summary>
+            Calculate the buoyant force acting on the object. Assuming that the object is fully submerged in the relevant fluid.
+            </summary>
+        </member>
+        <member name="T:AerodynamicObjects.DragModel">
+            <summary>
+            Calculates a translational drag force based on the square of the object's velocity and the planform area.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.DragModel.CD">
+            <summary>
+            The overall drag coefficient for the object. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.DragModel.CD_pressure_0aoa">
+            <summary>
+            The pressure drag coefficient at zero angle of attack. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.DragModel.CD_pressure_90aoa">
+            <summary>
+            The pressure drag coefficient at 90 degrees angle of attack. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.DragModel.CD_shear_0aoa">
+            <summary>
+            The shear drag coefficient at zero angle of attack. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.DragModel.CD_shear_90aoa">
+            <summary>
+            The shear drag coefficient at 90 degrees angle of attack. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.DragModel.CD_normalFlatPlate">
+            <summary>
+            The drag coefficient of a flat plate when aligned normal to the fluid flow.
+            Usually set as 1.2 in the literature. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.DragModel.CD_roughSphere">
+            <summary>
+            The drag coefficient of a rough sphere. Usually set as 0.5 in the literature. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.DragModel.reynoldsNumber">
+            <summary>
+            The Reynolds number of the flow. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.DragModel.Cf_linear">
+            <summary>
+            The shear stress coefficient, based on the Reynolds number of the flow. (dimensionless)
+            </summary>
+        </member>
+        <member name="T:AerodynamicObjects.Fluid">
+            <summary>
+            Contains the properties and state of a fluid.
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.Fluid.globalVelocity">
+            <summary>
+            The velocity of the fluid in the global (earth) frame of reference.
+            This is independent of the object's velocity. (m/s) (Read Only)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.Fluid.localVelocity">
+            <summary>
+            The velocity of the fluid in the object's frame of reference.
+            This is independent of the object's velocity. (m/s) (Read Only)
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.Fluid.bodyVelocity">
+            <summary>
+            The velocity of the fluid in the body's frame of reference.
+            This is independent of the object's velocity. (m/s) (Read Only)
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.Fluid.SetVelocity(AerodynamicObjects.Numerics.Vector3,AerodynamicObjects.Numerics.Vector3,AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Set the velocity of the fluid. Requires the velocity in both the object frame and the body frame.
+            This is an internally used function. Consider using AerodynamicObject.SetFluidVelocity instead.
+            </summary>
+            <param name="_globalVelocity">Velocity of the fluid in the global (earth) frame of reference. (m/s)</param>
+            <param name="_localVelocity">Velocity of the fluid in the object's frame of reference. (m/s)</param>
+            <param name="_bodyVelocity">Velocity of the fluid in the body's frame of reference. (m/s)</param>
+        </member>
+        <member name="F:AerodynamicObjects.Fluid.pressure">
+            <summary>
+            The pressure of the fluid around the object.
+            Default value is 101,325 Pa. The same as 1 atmosphere of pressure. (Pa)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.Fluid.density">
+            <summary>
+            The density of the fluid. Assuming incompressible flow.
+            Typical values include 1.23 for air and 1000 for water. (kg/m^3)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.Fluid.dynamicViscosity">
+            <summary>
+            Dynamic viscosity of the fluid. (Nm/s)
+            </summary>
+        </member>
+        <member name="T:AerodynamicObjects.IAerodynamicModel">
+            <summary>
+            Interface used by aerodynamic models, such as: Lift, Drag, Rotational Lift, Rotational Drag.
+            This interface allows for additional models to be developed and used by aerodynamic objects.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.IAerodynamicModel.GetAerodynamicLoad(AerodynamicObjects.AerodynamicObject)">
+            <summary>
+            Compute the aerodynamic load acting on the aerodynamic object.
+            </summary>
+            <param name="ao">The aerodynamic object we want to compute the aerodynamic load for.</param>
+            <returns>The resulting aerodynamic load.</returns>
+        </member>
+        <member name="T:AerodynamicObjects.LiftModel">
+            <summary>
+            Calculates the translational lift and induced drag forces acting on the object.
+            Also calculates the pitching moment due to the lift acting at the aerodynamic centre and the moment due to camber of the object.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.CL">
+            <summary>
+            The lift coefficient of the object. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.CZmax">
+            <summary>
+            The maximum normal coefficient of a flat plate. Usually set as 1 in the literature. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.liftCurveSlope">
+            <summary>
+            The lift curve slope is the rate of change of the lift coefficient with respect to angle of attack.
+            (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.CL_preStall">
+            <summary>
+            The lift coefficient of the object before stall is considered. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.CL_postStall">
+            <summary>
+            The lift coefficient of the object after stall is considered. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.CD_induced">
+            <summary>
+            The lift induced drag coefficient of the object. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.CM">
+            <summary>
+            The overall pitching moment coefficient of the object. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.CM_0">
+            <summary>
+            The pitching moment coefficient of the object due to camber. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.CM_delta">
+            <summary>
+            The pitching moment coefficient of the object due to aerodynamic centre movement. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.aerodynamicCentre_z">
+            <summary>
+            The distance of the aerodynamic centre from the object's centre,
+            along the equivalent body's chord direction. (m)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.aspectRatioCorrection_kAR">
+            <summary>
+            Aspect ratio correction is used to correct the lifting line theory for a finite span wing. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.thicknessCorrection_kt">
+            <summary>
+            An empirical correction in the form of a Gaussian-like function that has value 1 at zero thickness
+            and blends to zero as the thickness to chord ratio approaches 1. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.thicknessCorrectionAggressiveness">
+            <summary>
+            Blending constant used in the thickness correction. Larger values will cause the lift produced by an object
+            to drop faster and for smaller thickness to chord ratios. Default value of 6. (dimensionless)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.stallAngle">
+            <summary>
+            The angle at which the object will stall. Depends on an empirical relation in the model.
+            Stall leads to a large decrease in the lift an object produces. (degrees)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.upperSigmoid">
+            <summary>
+            Upper and lower sigmoid are used to blend between the lift coefficient pre and post stall.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.lowerSigmoid">
+            <summary>
+            Upper and lower sigmoid are used to blend between the lift coefficient pre and post stall.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.stallAngleMin">
+            <summary>
+            The starting angle for blending between pre and post stall.
+            At this angle of attack, the object will begin to stall.
+            Default value of 15. (degrees)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.stallAngleMax">
+            <summary>
+            The end angle for blending between pre and post stall.
+            By this angle of attack, the object will have completely stalled.
+            Default value of 35. (degrees)
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.LiftModel.stallSharpness">
+            <summary>
+            How abruptly the blending between pre and post stall occurs.
+            A large value will produce a sharp transition from pre stall levels of lift to post stall levels.
+            Some low order numerical methods might struggle with such sharp changes. (dimensionless)
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.LiftModel.GetAerodynamicLoad(AerodynamicObjects.AerodynamicObject)">
+            <summary>
+            Calculate the aerodynamic force of lift acting on the object. This includes the induced drag which alters the direction of the lift force.
+            </summary>
+        </member>
+        <member name="T:AerodynamicObjects.Numerics.AOMath">
+            <summary>
+            Used to implement math functions which are not included in System.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.AOMath.Clamp(System.Double,System.Double,System.Double)">
+            <summary>
+            Clamps a value to be between the min and max.
+            </summary>
+            <param name="value">Value to be clamped</param>
+            <param name="min">Minimum value</param>
+            <param name="max">Maximum value</param>
+            <returns>The clamped value, between min and max.</returns>
+        </member>
+        <member name="T:AerodynamicObjects.Numerics.Vector3">
+            <summary>
+            Used for 3 element vectors, such as standard cartesian coordinates in x, y, z.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.#ctor(System.Double,System.Double,System.Double)">
+            <summary>
+            Create a new Vector with elements x, y, z
+            </summary>
+            <param name="x">Value in the x axis</param>
+            <param name="y">Value in the y axis</param>
+            <param name="z">Value in the z axis</param>
+        </member>
+        <member name="P:AerodynamicObjects.Numerics.Vector3.Zero">
+            <summary>
+            Shorthand for new Vector3(0, 0, 0).
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.Numerics.Vector3.One">
+            <summary>
+            Shorthand for new Vector3(1, 1, 1).
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.Numerics.Vector3.X">
+            <summary>
+            The first element of the vector.
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.Numerics.Vector3.Y">
+            <summary>
+            The second element of the vector.
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.Numerics.Vector3.Z">
+            <summary>
+            The third element of the vector.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.Magnitude">
+            <summary>
+            Calculates the magnitude, or length, of the vector.
+            </summary>
+            <returns>Vector magnitude</returns>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.MagnitudeSquared">
+            <summary>
+            Calculates the square magnitude of the vector. This is the sum of the squares of each element.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.Normalised">
+            <summary>
+            Returns the normalised vector by dividing each element by the magnitude of the vector.
+            Checks for zero length vector and returns Vector3.Zero if that is the case.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.Normalise(AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Normalise a vector by dividing each element by the magnitude of the vector.
+            Checks for zero length vector and returns Vector3.Zero if that is the case.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.Magnitude(AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Calculate the magnitude, or length, of a vector.
+            </summary>
+            <returns>The scalar magnitude of the vector, v.</returns>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.MagnitudeSquared(AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Calculate the magnitude squared of a vector. This is the sum of the squares of each element.
+            </summary>
+            <returns>The scalar magnitude of the vector, v.</returns>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.Dot(AerodynamicObjects.Numerics.Vector3,AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Calculates the dot product of two vectors.
+            </summary>
+            <param name="lhs">The left hand side vector</param>
+            <param name="rhs">The right hand side vector</param>
+            <returns>The scalar result of the dot product.</returns>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.Cross(AerodynamicObjects.Numerics.Vector3,AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Calculates the cross product of two vectors.
+            </summary>
+            <param name="lhs">The left hand side vector</param>
+            <param name="rhs">The right hand side vector</param>
+            <returns>The resulting orthogonal vector of the cross product.</returns>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.Equals(System.Object)">
+            <summary>
+            Compares each element of the vectors.
+            </summary>
+            <returns>True if corresponding elements are equal to each other.</returns>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.op_Equality(AerodynamicObjects.Numerics.Vector3,AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Check componentwise equality of the two vectors.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.op_Inequality(AerodynamicObjects.Numerics.Vector3,AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Check componentwise inequality of the two vectors.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.ToString">
+            <summary>
+            Converts the vector to a string of elements separated by commas.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.GetHashCode">
+            <summary>
+            The default hash code generator for a vector.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.op_Addition(AerodynamicObjects.Numerics.Vector3,AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Add two vectors elementwise.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.Numerics.Vector3.op_Subtraction(AerodynamicObjects.Numerics.Vector3,AerodynamicObjects.Numerics.Vector3)">
+            <summary>
+            Subtract two vectors elementwise.
+            </summary>
+        </member>
+        <member name="T:AerodynamicObjects.Numerics.Quaternion">
+            <summary>
+            Stores the rotation of an object in the form (x, y, z, w).
+            </summary>
+        </member>
+        <member name="P:AerodynamicObjects.Numerics.Quaternion.Identity">
+            <summary>
+            A unit length quaternion which represents no rotation. (x,y,z,w) = (0,0,0,1)
+            </summary>
+        </member>
+        <member name="T:AerodynamicObjects.RotationalDampingModel">
+            <summary>
+            Calculates the damping force due to the rotational velocity of the object.
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.RotationalDampingModel.GetAerodynamicLoad(AerodynamicObjects.AerodynamicObject)">
+            <summary>
+            Calculate the moment due to rotational damping on the aerodynamic object.
+            </summary>
+        </member>
+        <member name="T:AerodynamicObjects.RotationalLiftModel">
+            <summary>
+            A model used to determine the lift force produced due to rotation of the object.
+            This is often referred to as the Magnus Effect. The current model is experimental and can produce
+            unrealistic results.
+            </summary>
+        </member>
+        <member name="F:AerodynamicObjects.RotationalLiftModel.CLr">
+            <summary>
+            The rotational lift coefficient used to determine the rotational lift force in the model. (dimensionless)
+            </summary>
+        </member>
+        <member name="M:AerodynamicObjects.RotationalLiftModel.GetAerodynamicLoad(AerodynamicObjects.AerodynamicObject)">
+            <summary>
+            Calculate the lift force due to rotation of the aerodynamic object.
+            </summary>
+        </member>
+    </members>
+</doc>

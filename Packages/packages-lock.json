@@ -9,15 +9,6 @@
       },
       "hash": "dfdc50830c201c53306fba4ab57ced763d2930c8"
     },
-    "com.theuniversityofmanchester.waterrocketsim": {
-      "version": "file:C:/Users/asanchez/Downloads/WaterRocketSim",
-      "depth": 0,
-      "source": "local",
-      "dependencies": {
-        "com.unity.inputsystem": "1.4.4",
-        "com.unity.textmeshpro": "3.0.6"
-      }
-    },
     "com.unity.collab-proxy": {
       "version": "2.7.1",
       "depth": 0,
@@ -80,7 +71,7 @@
     },
     "com.unity.inputsystem": {
       "version": "1.7.0",
-      "depth": 1,
+      "depth": 0,
       "source": "registry",
       "dependencies": {
         "com.unity.modules.uielements": "1.0.0"
@@ -155,7 +146,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.timeline": {
-      "version": "1.7.6",
+      "version": "1.7.7",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -186,7 +177,7 @@
       }
     },
     "com.unity.visualscripting": {
-      "version": "1.9.4",
+      "version": "1.9.5",
       "depth": 0,
       "source": "registry",
       "dependencies": {
